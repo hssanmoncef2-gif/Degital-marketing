@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Mood Quiz - PlayFeels</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --bg-dark: #0f0f17;
+            --bg-card: #1a1a2e;
+            --primary: #4361ee;
+            --secondary: #7209b7;
+            --accent: #3a0ca3;
+            --text: #ffffff;
+            --text-secondary: #b8b8b8;
+            --success: #4cc9f0;
+            --border-radius: 12px;
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        header {
+            background-color: rgba(15, 15, 23, 0.95);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 15px 0;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text);
+            text-decoration: none;
+        }
+
+        .logo i {
+            color: var(--primary);
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 20px;
+        }
+
+        nav a {
+            color: var(--text);
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
+
+        nav a:hover {
+            background-color: rgba(67, 97, 238, 0.1);
+        }
+
+        nav a.active {
+            color: var(--primary);
+            background-color: rgba(67, 97, 238, 0.2);
+        }
+
+        /* QUIZ STYLES */
+        .quiz-container {
+            padding: 40px 0;
+            min-height: 70vh;
+        }
+
+        .quiz-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .quiz-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .quiz-header p {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* PROGRESS BAR - FIXED! */
+        .progress-section {
+            margin: 30px 0;
+        }
+
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .progress-bar-bg {
+            height: 10px;
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 5px;
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border-radius: 5px;
+            width: 7%; /* STARTS AT 7% FOR QUESTION 1 */
+            transition: width 0.5s ease;
+        }
+
+        .progress-message {
+            text-align: center;
+            color: var(--success);
+            font-size: 0.9rem;
+            min-height: 20px;
+        }
+
+        /* QUESTION CARD */
+        .question-card {
+            background-color: var(--bg-card);
+            border-radius: var(--border-radius);
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .question-number {
+            color: var(--primary);
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .question-text {
+            font-size: 1.3rem;
+            margin-bottom: 25px;
+            line-height: 1.4;
+        }
+
+        /* SLIDER */
+        .slider-container {
+            padding: 15px 0;
+        }
+
+        .slider-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        .slider-left {
+            color: var(--primary);
+        }
+
+        .slider-right {
+            color: var(--secondary);
+        }
+
+        .slider {
+            width: 100%;
+            height: 10px;
+            -webkit-appearance: none;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            border-radius: 5px;
+            outline: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: white;
+            border: 3px solid var(--primary);
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .slider-value {
+            text-align: center;
+            margin-top: 10px;
+            font-weight: 600;
+            color: var(--success);
+            min-height: 25px;
+        }
+
+        /* MULTIPLE CHOICE */
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        .option-btn {
+            background-color: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--border-radius);
+            padding: 15px;
+            cursor: pointer;
+            transition: var(--transition);
+            text-align: center;
+        }
+
+        .option-btn:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .option-btn.selected {
+            background-color: rgba(67, 97, 238, 0.2);
+            border-color: var(--primary);
+            box-shadow: 0 3px 10px rgba(67, 97, 238, 0.2);
+        }
+
+        .option-icon {
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+            color: var(--primary);
+        }
+
+        /* BUTTONS */
+        .btn {
+            padding: 12px 25px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(67, 97, 238, 0.3);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        /* RESULTS */
+        .results-container {
+            text-align: center;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result-game {
+            background-color: var(--bg-card);
+            border-radius: var(--border-radius);
+            padding: 30px;
+            margin: 20px 0;
+            border: 2px solid var(--primary);
+        }
+
+        .match-percent {
+            font-size: 1.5rem;
+            color: var(--success);
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        .game-image {
+            width: 180px;
+            height: 180px;
+            border-radius: var(--border-radius);
+            margin: 15px auto;
+            overflow: hidden;
+        }
+
+        .game-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .game-title {
+            font-size: 1.8rem;
+            margin: 15px 0;
+        }
+
+        .game-price {
+            font-size: 1.3rem;
+            color: var(--success);
+            font-weight: 700;
+            margin: 10px 0;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 25px;
+            flex-wrap: wrap;
+        }
+
+        .btn-add {
+            background: linear-gradient(135deg, #28a745, #20c997);
+        }
+
+        .btn-share {
+            background: linear-gradient(135deg, #f72585, #b5179e);
+        }
+
+        .btn-retake {
+            background: linear-gradient(135deg, #ff9e00, #ff6d00);
+        }
+
+        footer {
+            background-color: var(--bg-card);
+            padding: 40px 0 20px;
+            margin-top: 50px;
+        }
+
+        .footer-content {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .footer-column {
+            flex: 1;
+            min-width: 180px;
+        }
+
+        .footer-column h3 {
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .footer-links {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 8px;
+        }
+
+        .footer-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: var(--transition);
+            font-size: 0.9rem;
+        }
+
+        .footer-links a:hover {
+            color: var(--primary);
+        }
+
+        .copyright {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <a href="index.html" class="logo">
+                    <i class="fas fa-gamepad"></i>
+                    <span>PlayFeels</span>
+                </a>
+                <nav>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="all-games.html">All Games</a></li>
+                        <li><a href="quiz.html" class="active">Quiz</a></li>
+                        <li><a href="about.html">About</a></li>
+                        <li><a href="contact.html">Contact</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <section class="quiz-container">
+        <div class="container">
+            <div class="quiz-header">
+                <h1>Game Mood Quiz</h1>
+                <p>Answer 15 questions to find your perfect game match!</p>
+            </div>
+
+            <!-- PROGRESS BAR - SIMPLE AND WORKING -->
+            <div class="progress-section">
+                <div class="progress-info">
+                    <span>Question <span id="currentQuestion">1</span> of 15</span>
+                    <span id="progressPercent">7%</span>
+                </div>
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" id="progressBar"></div>
+                </div>
+                <div class="progress-message" id="progressMessage">Let's find your perfect game! 🎮</div>
+            </div>
+
+            <!-- QUIZ CONTENT -->
+            <div id="quizContent"></div>
+
+            <!-- NAVIGATION -->
+            <div class="nav-buttons">
+                <button class="btn" id="prevBtn" disabled>
+                    <i class="fas fa-arrow-left"></i> Previous
+                </button>
+                <button class="btn" id="nextBtn">
+                    Next <i class="fas fa-arrow-right"></i>
+                </button>
+                <button class="btn" id="submitBtn" style="display: none;">
+                    Get Result <i class="fas fa-gamepad"></i>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3>PlayFeels</h3>
+                    <p style="color: var(--text-secondary); font-size: 0.9rem;">Find games that match your mood!</p>
+                </div>
+                <div class="footer-column">
+                    <h3>Pages</h3>
+                    <ul class="footer-links">
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="all-games.html">All Games</a></li>
+                        <li><a href="quiz.html">Quiz</a></li>
+                        <li><a href="about.html">About</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Support</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">Help Center</a></li>
+                        <li><a href="#">Contact</a></li>
+                        <li><a href="#">Privacy Policy</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>&copy; 2023 PlayFeels. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // QUIZ DATA - 15 QUESTIONS
+        const questions = [
+            { type: "slider", text: "How much energy do you have right now?", labels: ["Ready to relax", "Pumped up!"], key: "energy" },
+            { type: "multiple", text: "What type of experience do you want?", key: "experience", options: [
+                { text: "Story adventure", icon: "fas fa-book", value: "story" },
+                { text: "Fast action", icon: "fas fa-bolt", value: "action" },
+                { text: "Strategic thinking", icon: "fas fa-chess", value: "strategy" },
+                { text: "Social fun", icon: "fas fa-users", value: "social" }
+            ]},
+            { type: "slider", text: "How long do you want to play?", labels: ["Quick session", "All day"], key: "time" },
+            { type: "multiple", text: "What's your current mood?", key: "mood", options: [
+                { text: "Chill & relaxed", icon: "fas fa-spa", value: "chill" },
+                { text: "Excited & energetic", icon: "fas fa-fire", value: "excited" },
+                { text: "Thoughtful", icon: "fas fa-brain", value: "thoughtful" },
+                { text: "Social & chatty", icon: "fas fa-comments", value: "chatty" }
+            ]},
+            { type: "slider", text: "How competitive do you feel?", labels: ["Just for fun", "Tryhard mode"], key: "competitive" },
+            { type: "multiple", text: "Preferred game world?", key: "world", options: [
+                { text: "Fantasy", icon: "fas fa-dragon", value: "fantasy" },
+                { text: "Sci-fi", icon: "fas fa-rocket", value: "scifi" },
+                { text: "Modern/Real", icon: "fas fa-city", value: "modern" },
+                { text: "Abstract", icon: "fas fa-palette", value: "abstract" }
+            ]},
+            { type: "slider", text: "Desired difficulty level?", labels: ["Easy & casual", "Hard challenge"], key: "difficulty" },
+            { type: "multiple", text: "What role appeals to you?", key: "role", options: [
+                { text: "Hero", icon: "fas fa-shield-alt", value: "hero" },
+                { text: "Explorer", icon: "fas fa-map", value: "explorer" },
+                { text: "Builder", icon: "fas fa-hammer", value: "builder" },
+                { text: "Strategist", icon: "fas fa-flag", value: "strategist" }
+            ]},
+            { type: "slider", text: "How immersive should it be?", labels: ["Light fun", "Deep world"], key: "immersion" },
+            { type: "multiple", text: "Current emotional need?", key: "emotion", options: [
+                { text: "Happiness", icon: "fas fa-smile", value: "happy" },
+                { text: "Escape", icon: "fas fa-running", value: "escape" },
+                { text: "Challenge", icon: "fas fa-trophy", value: "challenge" },
+                { text: "Connection", icon: "fas fa-heart", value: "connection" }
+            ]},
+            { type: "slider", text: "Available focus level?", labels: ["Multitasking", "Full focus"], key: "focus" },
+            { type: "multiple", text: "Most important element?", key: "element", options: [
+                { text: "Graphics", icon: "fas fa-eye", value: "graphics" },
+                { text: "Gameplay", icon: "fas fa-gamepad", value: "gameplay" },
+                { text: "Story", icon: "fas fa-book-open", value: "story" },
+                { text: "Music", icon: "fas fa-music", value: "music" }
+            ]},
+            { type: "slider", text: "Social preference?", labels: ["Solo play", "With friends"], key: "social" },
+            { type: "multiple", text: "Preferred reward type?", key: "reward", options: [
+                { text: "Story progress", icon: "fas fa-bookmark", value: "story" },
+                { text: "Character growth", icon: "fas fa-user-plus", value: "growth" },
+                { text: "Loot & items", icon: "fas fa-gem", value: "loot" },
+                { text: "Rank & score", icon: "fas fa-star", value: "rank" }
+            ]},
+            { type: "slider", text: "Emotional intensity?", labels: ["Light & fun", "Deep & intense"], key: "intensity" }
+        ];
+
+        // GAMES FROM YOUR CATALOG
+        const games = [
+            { id: 1, title: "The Legend of Zelda: Tears of the Kingdom", price: 69.99, image: "images/zelda.jpeg", tags: ["adventure", "story", "fantasy", "exploration"] },
+            { id: 2, title: "Baldur's Gate 3", price: 59.99, image: "images/buldersgate.jpeg", tags: ["rpg", "story", "fantasy", "strategy"] },
+            { id: 3, title: "Marvel's Spider-Man 2", price: 69.99, image: "images/spooderman.jpeg", tags: ["action", "superhero", "modern", "story"] },
+            { id: 4, title: "Call of Duty: Modern Warfare III", price: 69.99, image: "images/cod.jpg", tags: ["action", "shooter", "competitive", "multiplayer"] },
+            { id: 5, title: "EA Sports FC 24", price: 59.99, image: "images/fifa.jpeg", tags: ["sports", "competitive", "multiplayer", "modern"] },
+            { id: 6, title: "Starfield", price: 69.99, image: "images/star.jpeg", tags: ["rpg", "scifi", "exploration", "story"] },
+            { id: 7, title: "Forza Motorsport", price: 59.99, image: "images/forza.jpeg", tags: ["racing", "sports", "competitive", "simulation"] },
+            { id: 8, title: "Hogwarts Legacy", price: 59.99, image: "images/hogwarts.jpeg", tags: ["rpg", "fantasy", "story", "adventure"] },
+            { id: 9, title: "Cyberpunk 2077: Phantom Liberty", price: 49.99, image: "images/cyber.jpeg", tags: ["rpg", "scifi", "story", "action"] },
+            { id: 10, title: "Resident Evil 4 Remake", price: 59.99, image: "images/re.jpeg", tags: ["horror", "action", "story", "thriller"] },
+            { id: 11, title: "Final Fantasy XVI", price: 69.99, image: "images/ff.jpeg", tags: ["rpg", "fantasy", "story", "action"] },
+            { id: 12, title: "Street Fighter 6", price: 59.99, image: "images/sf6.jpeg", tags: ["fighting", "competitive", "multiplayer", "action"] },
+            { id: 13, title: "Diablo IV", price: 69.99, image: "images/diablo.jpeg", tags: ["rpg", "action", "loot", "fantasy"] },
+            { id: 14, title: "Mortal Kombat 1", price: 69.99, image: "images/mk1.jpeg", tags: ["fighting", "competitive", "action", "fantasy"] },
+            { id: 15, title: "Star Wars Jedi: Survivor", price: 69.99, image: "images/starwars.jpeg", tags: ["action", "scifi", "story", "adventure"] },
+            { id: 16, title: "Assassin's Creed Mirage", price: 49.99, image: "images/ac.jpeg", tags: ["action", "adventure", "stealth", "history"] },
+            { id: 17, title: "Super Mario Bros. Wonder", price: 59.99, image: "images/sm.jpeg", tags: ["platformer", "fun", "family", "colorful"] },
+            { id: 18, title: "Alan Wake 2", price: 59.99, image: "images/aw.jpeg", tags: ["horror", "story", "psychological", "thriller"] },
+            { id: 19, title: "Cities: Skylines II", price: 49.99, image: "images/cs.jpeg", tags: ["simulation", "strategy", "building", "creative"] },
+            { id: 20, title: "Armored Core VI: Fires of Rubicon", price: 59.99, image: "images/amc.jpg", tags: ["action", "mech", "scifi", "combat"] }
+        ];
+
+        // QUIZ STATE
+        let currentQ = 0;
+        let answers = {};
+
+        // DOM ELEMENTS
+        const quizContent = document.getElementById('quizContent');
+        const progressBar = document.getElementById('progressBar');
+        const currentQuestionEl = document.getElementById('currentQuestion');
+        const progressPercent = document.getElementById('progressPercent');
+        const progressMessage = document.getElementById('progressMessage');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const submitBtn = document.getElementById('submitBtn');
+
+        // INIT QUIZ
+        function initQuiz() {
+            renderQuestion();
+            updateProgress();
+            updateButtons();
+            
+            // SET INITIAL PROGRESS BAR WIDTH
+            progressBar.style.width = '7%';
+            progressPercent.textContent = '7%';
+        }
+
+        // RENDER QUESTION
+        function renderQuestion() {
+            const q = questions[currentQ];
+            let html = `<div class="question-card">
+                <div class="question-number">Question ${currentQ + 1} of 15</div>
+                <div class="question-text">${q.text}</div>`;
+
+            if (q.type === 'slider') {
+                const value = answers[q.key] || 5;
+                html += `<div class="slider-container">
+                    <div class="slider-labels">
+                        <span class="slider-left">${q.labels[0]}</span>
+                        <span class="slider-right">${q.labels[1]}</span>
+                    </div>
+                    <input type="range" min="1" max="10" value="${value}" class="slider" id="slider">
+                    <div class="slider-value" id="sliderValue">${value}/10 - ${getSliderLabel(value)}</div>
+                </div>`;
+            } else {
+                html += '<div class="options-grid">';
+                q.options.forEach(opt => {
+                    const isSelected = answers[q.key] === opt.value;
+                    html += `<div class="option-btn ${isSelected ? 'selected' : ''}" 
+                             onclick="selectOption('${q.key}', '${opt.value}')">
+                        <div class="option-icon"><i class="${opt.icon}"></i></div>
+                        <div>${opt.text}</div>
+                    </div>`;
+                });
+                html += '</div>';
+            }
+
+            html += '</div>';
+            quizContent.innerHTML = html;
+
+            if (q.type === 'slider') {
+                const slider = document.getElementById('slider');
+                const valueDisplay = document.getElementById('sliderValue');
+                slider.addEventListener('input', function() {
+                    const val = this.value;
+                    answers[q.key] = parseInt(val);
+                    valueDisplay.textContent = `${val}/10 - ${getSliderLabel(val)}`;
+                    updateButtons();
+                });
+            }
+        }
+
+        function getSliderLabel(val) {
+            const labels = ["Very Low", "Low", "Low-Mid", "Mid-Low", "Medium", 
+                           "Mid-High", "High-Mid", "High", "Very High", "Extreme"];
+            return labels[val - 1] || "Medium";
+        }
+
+        function selectOption(key, value) {
+            answers[key] = value;
+            
+            // Update UI
+            document.querySelectorAll('.option-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            event.target.closest('.option-btn').classList.add('selected');
+            
+            updateButtons();
+        }
+
+        // UPDATE PROGRESS BAR - SIMPLE AND WORKING
+        function updateProgress() {
+            const percent = ((currentQ + 1) / 15) * 100;
+            const rounded = Math.round(percent);
+            
+            // UPDATE PROGRESS BAR WIDTH
+            progressBar.style.width = `${percent}%`;
+            
+            // UPDATE TEXT
+            currentQuestionEl.textContent = currentQ + 1;
+            progressPercent.textContent = `${rounded}%`;
+            
+            // UPDATE MESSAGE
+            const messages = [
+                "Let's find your perfect game! 🎮",
+                "Great start! 🚀",
+                "You're doing awesome! 🌟",
+                "Keep going! 💪",
+                "Halfway there! 🎯",
+                "Excellent choices! 😎",
+                "Almost done! ⚡",
+                "Last few questions! 🏁"
+            ];
+            const msgIndex = Math.min(Math.floor(currentQ / 2), messages.length - 1);
+            progressMessage.textContent = messages[msgIndex];
+        }
+
+        function updateButtons() {
+            const hasAnswer = answers[questions[currentQ].key] !== undefined;
+            
+            prevBtn.disabled = currentQ === 0;
+            nextBtn.disabled = !hasAnswer;
+            
+            if (currentQ === questions.length - 1) {
+                nextBtn.style.display = 'none';
+                submitBtn.style.display = 'inline-flex';
+                submitBtn.disabled = !hasAnswer;
+            } else {
+                nextBtn.style.display = 'inline-flex';
+                submitBtn.style.display = 'none';
+            }
+        }
+
+        function nextQuestion() {
+            if (currentQ < questions.length - 1) {
+                currentQ++;
+                renderQuestion();
+                updateProgress();
+                updateButtons();
+            }
+        }
+
+        function prevQuestion() {
+            if (currentQ > 0) {
+                currentQ--;
+                renderQuestion();
+                updateProgress();
+                updateButtons();
+            }
+        }
+
+        function calculateResult() {
+            // Simple matching algorithm
+            const userTags = [];
+            
+            // Convert answers to tags
+            if (answers.energy >= 7) userTags.push("action", "fast");
+            if (answers.energy <= 4) userTags.push("calm", "relaxed");
+            
+            if (answers.experience === "story") userTags.push("story", "narrative");
+            if (answers.experience === "action") userTags.push("action", "combat");
+            if (answers.experience === "strategy") userTags.push("strategy", "thinking");
+            if (answers.experience === "social") userTags.push("multiplayer", "social");
+            
+            if (answers.mood === "chill") userTags.push("relaxed", "calm");
+            if (answers.mood === "excited") userTags.push("exciting", "fast");
+            if (answers.mood === "thoughtful") userTags.push("story", "deep");
+            if (answers.mood === "chatty") userTags.push("social", "multiplayer");
+            
+            if (answers.world === "fantasy") userTags.push("fantasy", "magic");
+            if (answers.world === "scifi") userTags.push("scifi", "future");
+            if (answers.world === "modern") userTags.push("modern", "realistic");
+            
+            if (answers.role === "hero") userTags.push("hero", "adventure");
+            if (answers.role === "explorer") userTags.push("exploration", "openworld");
+            if (answers.role === "builder") userTags.push("creative", "building");
+            if (answers.role === "strategist") userTags.push("strategy", "tactical");
+            
+            if (answers.emotion === "happy") userTags.push("fun", "colorful");
+            if (answers.emotion === "escape") userTags.push("immersive", "escapism");
+            if (answers.emotion === "challenge") userTags.push("difficult", "challenging");
+            if (answers.emotion === "connection") userTags.push("story", "emotional");
+            
+            // Score games based on tag matches
+            const scoredGames = games.map(game => {
+                let score = 0;
+                userTags.forEach(tag => {
+                    if (game.tags.includes(tag)) score += 10;
+                });
+                
+                // Bonus for exact matches
+                if (answers.experience === "story" && game.tags.includes("story")) score += 20;
+                if (answers.experience === "action" && game.tags.includes("action")) score += 20;
+                if (answers.experience === "strategy" && game.tags.includes("strategy")) score += 20;
+                if (answers.experience === "social" && game.tags.includes("multiplayer")) score += 20;
+                
+                return { game, score };
+            });
+            
+            // Sort by score and return top match
+            scoredGames.sort((a, b) => b.score - a.score);
+            const topGame = scoredGames[0].game;
+            const topScore = scoredGames[0].score;
+            const maxScore = userTags.length * 10 + 20;
+            const matchPercent = Math.round((topScore / maxScore) * 100);
+            
+            return { game: topGame, percent: matchPercent };
+        }
+
+        function showResults() {
+            const result = calculateResult();
+            const game = result.game;
+            
+            quizContent.innerHTML = `
+                <div class="results-container">
+                    <h2 style="margin-bottom: 20px; color: var(--primary);">We Found Your Match!</h2>
+                    <p style="margin-bottom: 30px; color: var(--text-secondary);">Based on your mood, you should play:</p>
+                    
+                    <div class="result-game">
+                        <div class="match-percent">${result.percent}% Match!</div>
+                        <div class="game-image">
+                            <img src="${game.image}" alt="${game.title}" 
+                                 onerror="this.src='https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=300&h=300&fit=crop'">
+                        </div>
+                        <h3 class="game-title">${game.title}</h3>
+                        <p style="color: var(--text-secondary); margin: 15px 0;">${getGameDescription(game.id)}</p>
+                        <div class="game-price">$${game.price.toFixed(2)}</div>
+                        
+                        <div style="background: rgba(67, 97, 238, 0.1); padding: 15px; border-radius: 8px; margin-top: 20px; text-align: left;">
+                            <p style="color: var(--text); font-size: 0.9rem;"><strong>Why this game matches you:</strong> ${getMatchReason(game, result.percent)}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <button class="btn btn-add" onclick="addToCart(${game.id})">
+                            <i class="fas fa-cart-plus"></i> Add to Cart
+                        </button>
+                        <button class="btn btn-share" onclick="shareResult()">
+                            <i class="fas fa-share-alt"></i> Share
+                        </button>
+                        <button class="btn btn-retake" onclick="retakeQuiz()">
+                            <i class="fas fa-redo"></i> Retake
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.querySelector('.nav-buttons').style.display = 'none';
+            document.querySelector('.progress-section').style.display = 'none';
+        }
+
+        function getGameDescription(id) {
+            const descs = {
+                1: "Epic adventure across Hyrule's lands and skies",
+                2: "Deep RPG set in the Forgotten Realms",
+                3: "Swing through NYC as Spider-Man",
+                4: "Intense military shooter action",
+                5: "Ultimate football simulation",
+                6: "Explore 1000+ planets in space",
+                7: "Realistic racing simulation",
+                8: "Wizarding world adventure at Hogwarts",
+                9: "Cyberpunk spy-thriller expansion",
+                10: "Survival horror remake",
+                11: "Dark fantasy RPG epic",
+                12: "Classic fighting game evolved",
+                13: "Dark action RPG with loot",
+                14: "Brutal fighting franchise reboot",
+                15: "Star Wars action adventure",
+                16: "Assassin's Creed origins story",
+                17: "Colorful Mario platforming",
+                18: "Psychological horror thriller",
+                19: "City building simulation",
+                20: "Mech combat customization"
+            };
+            return descs[id] || "An amazing gaming experience";
+        }
+
+        function getMatchReason(game, percent) {
+            const reasons = [
+                "Your mood profile aligns perfectly with this game's atmosphere and gameplay style.",
+                "Based on your answers, this game offers exactly what you're looking for right now.",
+                "Your current preferences match this game's strengths and features.",
+                "This game will provide the experience you're craving based on your quiz responses."
+            ];
+            return reasons[Math.floor(Math.random() * reasons.length)];
+        }
+
+        function addToCart(id) {
+            const game = games.find(g => g.id === id);
+            if (!game) return;
+            
+            let cart = JSON.parse(localStorage.getItem('playfeels-cart')) || [];
+            const exists = cart.find(item => item.id === id);
+            
+            if (exists) {
+                exists.quantity++;
+            } else {
+                cart.push({
+                    id: game.id,
+                    title: game.title,
+                    price: game.price,
+                    icon: "fas fa-gamepad",
+                    quantity: 1
+                });
+            }
+            
+            localStorage.setItem('playfeels-cart', JSON.stringify(cart));
+            alert(`Added ${game.title} to cart!`);
+            window.location.href = "all-games.html#checkout";
+        }
+
+        function shareResult() {
+            alert("Share your result on social media!");
+        }
+
+        function retakeQuiz() {
+            currentQ = 0;
+            answers = {};
+            
+            document.querySelector('.nav-buttons').style.display = 'flex';
+            document.querySelector('.progress-section').style.display = 'block';
+            
+            initQuiz();
+        }
+
+        // INITIALIZE
+        document.addEventListener('DOMContentLoaded', function() {
+            initQuiz();
+            
+            prevBtn.addEventListener('click', prevQuestion);
+            nextBtn.addEventListener('click', nextQuestion);
+            submitBtn.addEventListener('click', showResults);
+        });
+
+        // GLOBAL FUNCTIONS
+        window.selectOption = selectOption;
+        window.addToCart = addToCart;
+        window.shareResult = shareResult;
+        window.retakeQuiz = retakeQuiz;
+    </script>
+</body>
+</html>
